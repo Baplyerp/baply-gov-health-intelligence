@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Activity, Globe, ShieldCheck, Menu, Bell, User, ChevronLeft, Database, TrendingUp, AlertTriangle, Globe2 
+  Activity, Globe, ShieldCheck, Menu, Bell, User, ChevronLeft, Database, TrendingUp, AlertTriangle, Globe2, Sun, Moon 
 } from "lucide-react";
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -29,77 +29,92 @@ const dataEficiencia = [
 ];
 
 const menuItems = [
-  { icon: Activity, label: "Cenários e Estatística", color: "text-blue-400", shadow: "shadow-blue-500/50", active: true },
-  { icon: ShieldCheck, label: "Governança (TCU)", color: "text-red-400", shadow: "shadow-red-500/50", active: false },
-  { icon: Globe, label: "Geopolítica da Saúde", color: "text-yellow-400", shadow: "shadow-yellow-500/50", active: false },
-  { icon: Database, label: "Repositório ENAP", color: "text-emerald-400", shadow: "shadow-emerald-500/50", active: false },
+  { icon: Activity, label: "Cenários e Estatística", color: "text-[#0033A0]", darkColor: "text-blue-400", active: true },
+  { icon: ShieldCheck, label: "Governança (TCU)", color: "text-[#EF3340]", darkColor: "text-red-400", active: false },
+  { icon: Globe, label: "Geopolítica da Saúde", color: "text-[#FFD100]", darkColor: "text-yellow-400", active: false },
+  { icon: Database, label: "Repositório ENAP", color: "text-[#009B3A]", darkColor: "text-emerald-400", active: false },
 ];
-
-const KpiCard = ({ title, value, icon: Icon, trend, color, delay }: any) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, duration: 0.5 }}
-    className="relative overflow-hidden rounded-2xl p-6 bg-slate-900/50 backdrop-blur-xl border border-slate-700/50 shadow-[0_8px_32px_rgba(0,0,0,0.3)] group"
-  >
-    <div className={`absolute -inset-1 bg-gradient-to-r ${color} opacity-0 group-hover:opacity-10 blur transition-opacity duration-500`} />
-    <div className="relative z-10 flex justify-between items-start">
-      <div>
-        <p className="text-sm font-medium text-slate-400 mb-1">{title}</p>
-        <h3 className="text-3xl font-bold text-white tracking-tight">{value}</h3>
-        <div className="flex items-center gap-1 mt-2">
-          <TrendingUp size={14} className="text-emerald-400" />
-          <span className="text-xs text-emerald-400 font-medium">{trend} vs mês anterior</span>
-        </div>
-      </div>
-      <div className="p-3 rounded-xl bg-slate-800 border border-slate-700">
-        <Icon size={24} className="text-slate-300" />
-      </div>
-    </div>
-  </motion.div>
-);
 
 export default function HubGovernanca() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [isLightMode, setIsLightMode] = useState(false);
+
+  // --- PALETA DINÂMICA (Baseada no Manual do Gov.MA) ---
+  const theme = {
+    bgMain: isLightMode ? "bg-slate-50 text-slate-800" : "bg-[#0B1120] text-slate-200",
+    bgSidebar: isLightMode ? "bg-white/80 border-slate-200" : "bg-slate-900/50 border-slate-800",
+    bgHeader: isLightMode ? "bg-white/70 border-slate-200" : "bg-slate-900/40 border-slate-800",
+    bgCard: isLightMode ? "bg-white/90 border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]" : "bg-slate-900/50 border-slate-700/50 shadow-[0_8px_32px_rgba(0,0,0,0.3)]",
+    textMuted: isLightMode ? "text-slate-500" : "text-slate-400",
+    textHeading: isLightMode ? "text-slate-900" : "text-white",
+    chartGrid: isLightMode ? "#e2e8f0" : "#1e293b",
+    chartText: isLightMode ? "#64748b" : "#94a3b8",
+    chartTooltipBg: isLightMode ? "#ffffff" : "#0f172a",
+    chartTooltipBorder: isLightMode ? "#e2e8f0" : "#334155",
+    chartTooltipText: isLightMode ? "#0f172a" : "#ffffff",
+    menuHover: isLightMode ? "hover:bg-slate-100" : "hover:bg-slate-800/50",
+    menuActiveBg: isLightMode ? "bg-slate-100 border-slate-200" : "bg-slate-800 border-slate-700",
+  };
+
+  const KpiCard = ({ title, value, icon: Icon, trend, gradient, delay }: any) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, duration: 0.5 }}
+      className={`relative overflow-hidden rounded-2xl p-6 backdrop-blur-xl border group transition-colors ${theme.bgCard}`}
+    >
+      <div className={`absolute -inset-1 bg-gradient-to-r ${gradient} opacity-0 group-hover:opacity-10 blur transition-opacity duration-500`} />
+      <div className="relative z-10 flex justify-between items-start">
+        <div>
+          <p className={`text-sm font-medium mb-1 ${theme.textMuted}`}>{title}</p>
+          <h3 className={`text-3xl font-bold tracking-tight ${theme.textHeading}`}>{value}</h3>
+          <div className="flex items-center gap-1 mt-2">
+            <TrendingUp size={14} className="text-[#009B3A]" />
+            <span className="text-xs text-[#009B3A] font-medium">{trend} vs mês anterior</span>
+          </div>
+        </div>
+        <div className={`p-3 rounded-xl border ${isLightMode ? 'bg-slate-50 border-slate-100' : 'bg-slate-800 border-slate-700'}`}>
+          <Icon size={24} className={isLightMode ? 'text-slate-600' : 'text-slate-300'} />
+        </div>
+      </div>
+    </motion.div>
+  );
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#0B1120] text-slate-200 font-sans">
+    <div className={`flex h-screen w-full overflow-hidden font-sans transition-colors duration-500 ${theme.bgMain}`}>
       
-      {/* BACKGROUND ANIMADO (GLOW EFFECT) */}
+      {/* BACKGROUND ANIMADO (Brilha de acordo com o tema) */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <motion.div 
-          animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }} transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-[#0033A0]/30 blur-[120px]" 
+          animate={{ scale: [1, 1.2, 1], opacity: isLightMode ? [0.05, 0.1, 0.05] : [0.1, 0.2, 0.1] }} transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-[#0033A0] blur-[120px]" 
         />
         <motion.div 
-          animate={{ scale: [1, 1.5, 1], opacity: [0.05, 0.15, 0.05] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          className="absolute top-[40%] -right-[10%] w-[40%] h-[60%] rounded-full bg-[#EF3340]/20 blur-[150px]" 
+          animate={{ scale: [1, 1.5, 1], opacity: isLightMode ? [0.02, 0.08, 0.02] : [0.05, 0.15, 0.05] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+          className="absolute top-[40%] -right-[10%] w-[40%] h-[60%] rounded-full bg-[#EF3340] blur-[150px]" 
         />
       </div>
 
-      {/* SIDEBAR GLASSMORPHISM */}
+      {/* SIDEBAR */}
       <motion.aside
         initial={false} animate={{ width: isSidebarOpen ? 280 : 80 }}
-        className="relative z-20 flex flex-col h-full border-r border-slate-800 bg-slate-900/50 backdrop-blur-xl"
+        className={`relative z-20 flex flex-col h-full border-r backdrop-blur-xl transition-colors duration-500 ${theme.bgSidebar}`}
       >
-        <div className="flex items-center justify-between h-20 px-4 border-b border-slate-800">
+        <div className={`flex items-center justify-between h-20 px-4 border-b ${isLightMode ? 'border-slate-200' : 'border-slate-800'}`}>
           <AnimatePresence mode="wait">
             {isSidebarOpen && (
-              <motion.div
-                initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-                className="flex items-center gap-3"
-              >
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#0033A0] to-[#EF3340] p-[2px] shadow-[0_0_15px_rgba(239,51,64,0.4)]">
-                  <div className="w-full h-full bg-[#0B1120] rounded-md flex items-center justify-center">
-                    <Activity size={20} className="text-[#FFD100]" />
+              <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#0033A0] to-[#EF3340] p-[2px] shadow-[0_0_15px_rgba(239,51,64,0.3)]">
+                  <div className={`w-full h-full rounded-md flex items-center justify-center ${isLightMode ? 'bg-white' : 'bg-[#0B1120]'}`}>
+                    <Activity size={20} className={isLightMode ? "text-[#0033A0]" : "text-[#FFD100]"} />
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-bold text-sm tracking-wide text-white">HUB SAÚDE</span>
-                  <span className="text-[10px] text-slate-400 uppercase tracking-widest">Maranhão</span>
+                  <span className={`font-bold text-sm tracking-wide ${theme.textHeading}`}>HUB SAÚDE</span>
+                  <span className={`text-[10px] uppercase tracking-widest ${theme.textMuted}`}>Maranhão</span>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
-          <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="p-2 rounded-lg hover:bg-slate-800 transition-colors text-slate-400 hover:text-white">
+          <button onClick={() => setSidebarOpen(!isSidebarOpen)} className={`p-2 rounded-lg transition-colors ${theme.menuHover} ${theme.textMuted} hover:${theme.textHeading}`}>
             {isSidebarOpen ? <ChevronLeft size={20} /> : <Menu size={20} />}
           </button>
         </div>
@@ -109,15 +124,15 @@ export default function HubGovernanca() {
             <motion.div
               key={index} whileHover={{ scale: 1.02, x: 5 }} whileTap={{ scale: 0.98 }}
               className={`flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-300 relative cursor-pointer ${
-                item.active ? "bg-slate-800 border border-slate-700" : "hover:bg-slate-800/50"
+                item.active ? theme.menuActiveBg : theme.menuHover
               }`}
             >
-              {item.active && <div className={`absolute inset-0 opacity-10 bg-gradient-to-r from-transparent to-current ${item.color}`} />}
-              <item.icon size={22} className={`${item.active ? item.color : "text-slate-500"} drop-shadow-lg ${item.active ? item.shadow : ""}`} />
+              {item.active && <div className={`absolute inset-0 opacity-10 bg-gradient-to-r from-transparent to-current ${isLightMode ? item.color : item.darkColor}`} />}
+              <item.icon size={22} className={`${item.active ? (isLightMode ? item.color : item.darkColor) : theme.textMuted} drop-shadow-sm`} />
               <AnimatePresence>
                 {isSidebarOpen && (
                   <motion.span initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: "auto" }} exit={{ opacity: 0, width: 0 }}
-                    className={`text-sm font-medium whitespace-nowrap ${item.active ? "text-white" : "text-slate-400"}`}
+                    className={`text-sm font-medium whitespace-nowrap ${item.active ? theme.textHeading : theme.textMuted}`}
                   >
                     {item.label}
                   </motion.span>
@@ -132,39 +147,52 @@ export default function HubGovernanca() {
       <div className="flex-1 flex flex-col relative z-10 h-screen overflow-hidden">
         
         {/* TOPBAR */}
-        <header className="h-20 border-b border-slate-800 bg-slate-900/40 backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-30">
+        <header className={`h-20 border-b backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-30 transition-colors duration-500 ${theme.bgHeader}`}>
           <div>
-            <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Painel de Inteligência e Evidências</h1>
-            <p className="text-xs text-slate-500">Secretaria Adjunta de Assistência à Saúde</p>
+            <h1 className={`text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${isLightMode ? 'from-slate-900 to-slate-600' : 'from-white to-slate-400'}`}>
+              Painel de Inteligência e Evidências
+            </h1>
+            <p className={`text-xs ${theme.textMuted}`}>Secretaria Adjunta de Assistência à Saúde</p>
           </div>
           <div className="flex items-center gap-6">
-            <motion.button whileHover={{ rotate: 15 }} className="relative text-slate-400 hover:text-white">
+            
+            {/* TOGGLE TEMA */}
+            <motion.button 
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setIsLightMode(!isLightMode)} 
+              className={`p-2 rounded-full border transition-colors ${isLightMode ? 'bg-slate-100 border-slate-200 text-amber-500' : 'bg-slate-800 border-slate-700 text-blue-400'}`}
+              title="Alternar Tema"
+            >
+              {isLightMode ? <Sun size={18} /> : <Moon size={18} />}
+            </motion.button>
+
+            <motion.button whileHover={{ rotate: 15 }} className={`relative transition-colors ${theme.textMuted} hover:${theme.textHeading}`}>
               <Bell size={20} />
               <span className="absolute -top-1 -right-1 flex h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#EF3340] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-[#EF3340] border-2 border-[#0B1120]"></span>
+                <span className={`relative inline-flex rounded-full h-3 w-3 bg-[#EF3340] border-2 ${isLightMode ? 'border-white' : 'border-[#0B1120]'}`}></span>
               </span>
             </motion.button>
-            <div className="flex items-center gap-3 pl-6 border-l border-slate-700">
+            <div className={`flex items-center gap-3 pl-6 border-l ${isLightMode ? 'border-slate-200' : 'border-slate-700'}`}>
               <div className="text-right hidden md:block">
-                <p className="text-sm font-semibold text-white">Gestor de Dados</p>
-                <p className="text-[11px] text-[#0033A0] font-bold">Trainee Gov.MA</p>
+                <p className={`text-sm font-semibold ${theme.textHeading}`}>Gestor de Dados</p>
+                <p className={`text-[11px] font-bold ${isLightMode ? 'text-[#0033A0]' : 'text-blue-400'}`}>Trainee Gov.MA</p>
               </div>
-              <div className="h-10 w-10 rounded-full bg-slate-800 border-2 border-[#0033A0] flex items-center justify-center shadow-[0_0_10px_rgba(0,51,160,0.5)]">
-                <User size={18} className="text-slate-300" />
+              <div className={`h-10 w-10 rounded-full border-2 border-[#0033A0] flex items-center justify-center shadow-[0_0_10px_rgba(0,51,160,0.3)] ${isLightMode ? 'bg-slate-100' : 'bg-slate-800'}`}>
+                <User size={18} className={theme.textMuted} />
               </div>
             </div>
           </div>
         </header>
 
-        {/* CONTEÚDO DA PÁGINA (CENÁRIOS) */}
+        {/* CONTEÚDO DA PÁGINA */}
         <main className="flex-1 overflow-y-auto p-8 scroll-smooth">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }}>
             
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-3xl font-extrabold text-white tracking-tight">Análise de Cenários e Predição</h2>
-                <p className="text-sm text-slate-400 mt-1">Comparativo de performance e modelagem preditiva de assistência</p>
+                <h2 className={`text-3xl font-extrabold tracking-tight ${theme.textHeading}`}>Análise de Cenários e Predição</h2>
+                <p className={`text-sm mt-1 ${theme.textMuted}`}>Comparativo de performance e modelagem preditiva de assistência</p>
               </div>
               <button className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#0033A0] to-[#002277] text-white text-sm font-bold shadow-[0_0_20px_rgba(0,51,160,0.4)] hover:shadow-[0_0_30px_rgba(0,51,160,0.6)] transition-all">
                 Atualizar Modelos
@@ -172,19 +200,19 @@ export default function HubGovernanca() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <KpiCard title="Índice de Cobertura" value="82.4%" icon={Activity} trend="+2.1%" color="from-blue-500 to-cyan-500" delay={0.1} />
-              <KpiCard title="Risco Epidemiológico" value="Moderado" icon={AlertTriangle} trend="-1.5%" color="from-yellow-500 to-orange-500" delay={0.2} />
-              <KpiCard title="Eficiência Alocativa" value="0.78" icon={TrendingUp} trend="+0.05" color="from-green-500 to-emerald-500" delay={0.3} />
-              <KpiCard title="Aderência Global" value="68%" icon={Globe2} trend="+4.2%" color="from-red-500 to-rose-500" delay={0.4} />
+              <KpiCard title="Índice de Cobertura" value="82.4%" icon={Activity} trend="+2.1%" gradient="from-[#0033A0] to-[#0055ff]" delay={0.1} />
+              <KpiCard title="Risco Epidemiológico" value="Moderado" icon={AlertTriangle} trend="-1.5%" gradient="from-[#FFD100] to-[#ffaa00]" delay={0.2} />
+              <KpiCard title="Eficiência Alocativa" value="0.78" icon={TrendingUp} trend="+0.05" gradient="from-[#009B3A] to-[#00cc4c]" delay={0.3} />
+              <KpiCard title="Aderência Global" value="68%" icon={Globe2} trend="+4.2%" gradient="from-[#EF3340] to-[#ff5566]" delay={0.4} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Gráfico 1: Projeção */}
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }}
-                className="lg:col-span-2 p-6 rounded-2xl bg-slate-900/50 backdrop-blur-xl border border-slate-700/50 shadow-2xl relative overflow-hidden"
+                className={`lg:col-span-2 p-6 rounded-2xl backdrop-blur-xl border relative overflow-hidden transition-colors ${theme.bgCard}`}
               >
-                <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                <h3 className={`text-lg font-bold mb-6 flex items-center gap-2 ${theme.textHeading}`}>
                   <span className="w-2 h-6 bg-[#0033A0] rounded-full"></span>
                   Projeção Estatística: Demanda vs. Capacidade
                 </h3>
@@ -201,10 +229,10 @@ export default function HubGovernanca() {
                           <stop offset="95%" stopColor="#FFD100" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                      <XAxis dataKey="mes" stroke="#64748b" tick={{ fill: '#64748b' }} axisLine={false} />
-                      <YAxis stroke="#64748b" tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
-                      <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#fff' }} />
+                      <CartesianGrid strokeDasharray="3 3" stroke={theme.chartGrid} vertical={false} />
+                      <XAxis dataKey="mes" stroke={theme.chartText} tick={{ fill: theme.chartText }} axisLine={false} />
+                      <YAxis stroke={theme.chartText} tick={{ fill: theme.chartText }} axisLine={false} tickLine={false} />
+                      <Tooltip contentStyle={{ backgroundColor: theme.chartTooltipBg, borderColor: theme.chartTooltipBorder, borderRadius: '12px', color: theme.chartTooltipText }} />
                       <Area type="monotone" dataKey="alerta" stroke="#EF3340" strokeWidth={2} strokeDasharray="5 5" fill="none" name="Limite Crítico" />
                       <Area type="monotone" dataKey="projetado" stroke="#FFD100" strokeWidth={3} fillOpacity={1} fill="url(#colorProjetado)" name="Modelo Preditivo" />
                       <Area type="monotone" dataKey="atual" stroke="#0033A0" strokeWidth={3} fillOpacity={1} fill="url(#colorAtual)" name="Dado Consolidado" />
@@ -216,24 +244,24 @@ export default function HubGovernanca() {
               {/* Gráfico 2: Radar Internacional */}
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6 }}
-                className="p-6 rounded-2xl bg-slate-900/50 backdrop-blur-xl border border-slate-700/50 shadow-2xl relative overflow-hidden flex flex-col"
+                className={`p-6 rounded-2xl backdrop-blur-xl border relative overflow-hidden flex flex-col transition-colors ${theme.bgCard}`}
               >
-                <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                <h3 className={`text-lg font-bold mb-2 flex items-center gap-2 ${theme.textHeading}`}>
                   <span className="w-2 h-6 bg-[#EF3340] rounded-full"></span>
                   Matriz de Benchmark Global
                 </h3>
-                <p className="text-xs text-slate-400 mb-4">Análise comparada de administração pública</p>
+                <p className={`text-xs mb-4 ${theme.textMuted}`}>Análise comparada de administração pública</p>
                 <div className="flex-1 w-full min-h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <RadarChart cx="50%" cy="50%" outerRadius="70%" data={dataEficiencia}>
-                      <PolarGrid stroke="#334155" />
-                      <PolarAngleAxis dataKey="metrica" tick={{ fill: '#94a3b8', fontSize: 11 }} />
+                      <PolarGrid stroke={theme.chartGrid} />
+                      <PolarAngleAxis dataKey="metrica" tick={{ fill: theme.chartText, fontSize: 11 }} />
                       <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
                       <Radar name="Maranhão" dataKey="Maranhao" stroke="#FFD100" strokeWidth={2} fill="#FFD100" fillOpacity={0.3} />
                       <Radar name="Mod. Sino-Brasileiro" dataKey="SinoBrasileiro" stroke="#009B3A" strokeWidth={2} fill="#009B3A" fillOpacity={0.1} />
                       <Radar name="Padrão OCDE" dataKey="OCDE" stroke="#0033A0" strokeWidth={2} fill="#0033A0" fillOpacity={0.1} />
-                      <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '20px' }} />
-                      <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px' }} />
+                      <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '20px', color: theme.chartText }} />
+                      <Tooltip contentStyle={{ backgroundColor: theme.chartTooltipBg, borderColor: theme.chartTooltipBorder, borderRadius: '8px', color: theme.chartTooltipText }} />
                     </RadarChart>
                   </ResponsiveContainer>
                 </div>
