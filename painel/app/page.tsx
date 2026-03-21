@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Activity, Globe, ShieldCheck, Menu, Bell, User, ChevronLeft, Database, TrendingUp, AlertTriangle, Globe2, Sun, Moon 
+  Activity, Globe, ShieldCheck, Menu, Bell, User, ChevronLeft, Database, TrendingUp, AlertTriangle, Globe2, Sun, Moon, ExternalLink 
 } from "lucide-react";
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -30,11 +30,14 @@ export default function HubGovernanca() {
   // Estados para guardar os dados reais do banco
   const [dataProjecao, setDataProjecao] = useState<any[]>([]);
   const [dataEficiencia, setDataEficiencia] = useState<any[]>([]);
+  const [evidencias, setEvidencias] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Busca os dados no Supabase assim que a tela carrega
   useEffect(() => {
     async function carregarDados() {
+      setIsLoading(true);
+      
       // 1. Busca os dados de capacidade preditiva
       const { data: indicadores } = await supabase
         .from('indicadores_capacidade')
@@ -42,10 +45,8 @@ export default function HubGovernanca() {
         .order('mes_referencia', { ascending: true });
 
       if (indicadores) {
-        // Formata os dados para o gráfico de Área
         const formatados = indicadores.map((item) => {
           const data = new Date(item.mes_referencia);
-          // Adiciona 1 dia para corrigir o fuso horário ao extrair o mês
           data.setDate(data.getDate() + 1); 
           const mesFormatado = data.toLocaleDateString('pt-BR', { month: 'short' });
           
@@ -65,7 +66,6 @@ export default function HubGovernanca() {
         .select('*');
 
       if (matriz) {
-        // Formata os dados para o gráfico de Radar
         const matrizFormatada = matriz.map((item) => ({
           metrica: item.eixo_analise,
           Maranhao: item.score_maranhao,
@@ -74,6 +74,13 @@ export default function HubGovernanca() {
         }));
         setDataEficiencia(matrizFormatada);
       }
+
+      // 3. Busca o Repositório de Evidências (ENAP/TCU/Manual)
+      const { data: docs } = await supabase
+        .from('repositorio_evidencias')
+        .select('*');
+      
+      if (docs) setEvidencias(docs);
 
       setIsLoading(false);
     }
@@ -105,6 +112,35 @@ export default function HubGovernanca() {
     </motion.div>
   );
 
+  const DocumentCard = ({ doc, index }: { doc: any, index: number }) => (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 * index }}
+      className={`p-5 rounded-xl border group hover:scale-[1.02] transition-all cursor-pointer ${
+        isLightMode ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-800/40 border-slate-700 hover:border-[#FFD100]'
+      }`}
+    >
+      <div className="flex items-start justify-between mb-4">
+        <div className={`p-2 rounded-lg ${isLightMode ? 'bg-slate-100' : 'bg-slate-700'}`}>
+          <Database size={20} className="text-[#FFD100]" />
+        </div>
+        <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-tighter ${
+          doc.categoria === 'Governança TCU' ? 'bg-red-500/10 text-red-500' : 
+          doc.categoria === 'Admin Gerencial' ? 'bg-blue-500/10 text-blue-500' : 'bg-emerald-500/10 text-emerald-500'
+        }`}>
+          {doc.categoria}
+        </span>
+      </div>
+      <h4 className={`font-bold text-sm mb-2 line-clamp-1 ${isLightMode ? 'text-slate-900' : 'text-white'}`}>{doc.titulo_documento}</h4>
+      <p className={`text-[11px] leading-relaxed mb-4 line-clamp-2 ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>
+        <span className="font-bold text-[#009B3A]">Aplicação:</span> {doc.aplicabilidade_pratica}
+      </p>
+      <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-700/30">
+        <span className="text-[10px] text-slate-500 italic">Fonte: Repositório ENAP</span>
+        <ExternalLink size={14} className="text-[#0033A0] opacity-0 group-hover:opacity-100 transition-opacity" />
+      </div>
+    </motion.div>
+  );
+
   return (
     <div className={`flex h-screen w-full overflow-hidden font-sans ${isLightMode ? "bg-slate-50 text-slate-800" : "bg-[#0B1120] text-slate-200"}`}>
       
@@ -120,7 +156,7 @@ export default function HubGovernanca() {
         />
       </div>
 
-      {/* SIDEBAR COM ANIMAÇÃO */}
+      {/* SIDEBAR */}
       <motion.aside
         initial={false} animate={{ width: isSidebarOpen ? 280 : 80 }}
         className={`relative z-20 flex flex-col h-full border-r backdrop-blur-xl ${isLightMode ? 'bg-white/80 border-slate-200' : 'bg-slate-900/50 border-slate-800'}`}
@@ -151,9 +187,7 @@ export default function HubGovernanca() {
             <motion.div
               key={index} whileHover={{ scale: 1.02, x: 5 }} whileTap={{ scale: 0.98 }}
               className={`flex items-center gap-4 px-3 py-3 rounded-xl cursor-pointer relative overflow-hidden ${
-                item.active 
-                  ? (isLightMode ? 'bg-slate-100 border-slate-200 border' : 'bg-slate-800 border-slate-700 border') 
-                  : (isLightMode ? 'hover:bg-slate-100' : 'hover:bg-slate-800/50')
+                item.active ? (isLightMode ? 'bg-slate-100 border-slate-200 border' : 'bg-slate-800 border-slate-700 border') : (isLightMode ? 'hover:bg-slate-100' : 'hover:bg-slate-800/50')
               }`}
             >
               {item.active && <div className={`absolute inset-0 opacity-10 bg-gradient-to-r from-transparent to-current ${isLightMode ? item.color : item.darkColor}`} />}
@@ -183,7 +217,6 @@ export default function HubGovernanca() {
             <p className={`text-xs ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>Secretaria Adjunta de Assistência à Saúde</p>
           </div>
           <div className="flex items-center gap-6">
-            
             <motion.button 
               whileTap={{ scale: 0.9 }}
               onClick={() => setIsLightMode(!isLightMode)} 
@@ -191,7 +224,6 @@ export default function HubGovernanca() {
             >
               {isLightMode ? <Sun size={18} /> : <Moon size={18} />}
             </motion.button>
-
             <motion.button whileHover={{ rotate: 15 }} className={`relative ${isLightMode ? 'text-slate-500 hover:text-slate-900' : 'text-slate-400 hover:text-white'}`}>
               <Bell size={20} />
               <span className="absolute -top-1 -right-1 flex h-3 w-3">
@@ -230,8 +262,7 @@ export default function HubGovernanca() {
               <KpiCard title="Aderência Global" value="68%" icon={Globe2} trend="+4.2%" gradient="from-[#EF3340] to-[#ff5566]" delay={0.4} />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Gráfico 1: Puxando dados do Supabase */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }}
                 className={`lg:col-span-2 p-6 rounded-2xl backdrop-blur-xl border relative overflow-hidden ${isLightMode ? 'bg-white/90 border-slate-200 shadow-sm' : 'bg-slate-900/50 border-slate-700/50 shadow-xl'}`}
@@ -271,7 +302,6 @@ export default function HubGovernanca() {
                 </div>
               </motion.div>
 
-              {/* Gráfico 2: Puxando dados do Supabase */}
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6 }}
                 className={`p-6 rounded-2xl backdrop-blur-xl border flex flex-col relative overflow-hidden ${isLightMode ? 'bg-white/90 border-slate-200 shadow-sm' : 'bg-slate-900/50 border-slate-700/50 shadow-xl'}`}
@@ -303,6 +333,27 @@ export default function HubGovernanca() {
                 </div>
               </motion.div>
             </div>
+
+            {/* SEÇÃO: REPOSITÓRIO DE EVIDÊNCIAS (ENAP / TCU) */}
+            <div className="mb-8">
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-1 h-6 bg-[#009B3A] rounded-full"></div>
+                <h3 className={`text-xl font-bold ${isLightMode ? 'text-slate-900' : 'text-white'}`}>Repositório de Evidências e Referenciais</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {isLoading ? (
+                   [1, 2, 3].map((i) => (
+                    <div key={i} className={`h-40 rounded-xl animate-pulse ${isLightMode ? 'bg-slate-200' : 'bg-slate-800'}`}></div>
+                  ))
+                ) : (
+                  evidencias.map((doc, index) => (
+                    <DocumentCard key={doc.id} doc={doc} index={index} />
+                  ))
+                )}
+              </div>
+            </div>
+
           </motion.div>
         </main>
       </div>
