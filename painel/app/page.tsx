@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Activity, Globe, ShieldCheck, Menu, Bell, User, ChevronLeft, Database, TrendingUp, AlertTriangle, Globe2, Sun, Moon 
@@ -9,24 +9,12 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend
 } from "recharts";
+import { createClient } from "@supabase/supabase-js";
 
-// --- DADOS SIMULADOS ---
-const dataProjecao = [
-  { mes: "Jan", atual: 65, projetado: 60, alerta: 80 },
-  { mes: "Fev", atual: 72, projetado: 68, alerta: 80 },
-  { mes: "Mar", atual: 85, projetado: 82, alerta: 80 },
-  { mes: "Abr", atual: 78, projetado: 85, alerta: 80 },
-  { mes: "Mai", atual: null, projetado: 88, alerta: 80 },
-  { mes: "Jun", atual: null, projetado: 75, alerta: 80 },
-];
-
-const dataEficiencia = [
-  { metrica: "Prev. Primária", Maranhao: 75, OCDE: 85, SinoBrasileiro: 90 },
-  { metrica: "Tempo Resp.", Maranhao: 60, OCDE: 90, SinoBrasileiro: 85 },
-  { metrica: "Dig. de Dados", Maranhao: 45, OCDE: 95, SinoBrasileiro: 98 },
-  { metrica: "Cobertura", Maranhao: 80, OCDE: 98, SinoBrasileiro: 95 },
-  { metrica: "Aloc. Recursos", Maranhao: 65, OCDE: 88, SinoBrasileiro: 80 },
-];
+// --- CONEXÃO COM O BANCO DE DADOS (SUPABASE) ---
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const menuItems = [
   { icon: Activity, label: "Cenários e Estatística", color: "text-[#0033A0]", darkColor: "text-blue-400", active: true },
@@ -38,8 +26,61 @@ const menuItems = [
 export default function HubGovernanca() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isLightMode, setIsLightMode] = useState(false);
+  
+  // Estados para guardar os dados reais do banco
+  const [dataProjecao, setDataProjecao] = useState<any[]>([]);
+  const [dataEficiencia, setDataEficiencia] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Removi as classes de "transition" pesadas dos fundos para o clique ser instantâneo
+  // Busca os dados no Supabase assim que a tela carrega
+  useEffect(() => {
+    async function carregarDados() {
+      // 1. Busca os dados de capacidade preditiva
+      const { data: indicadores } = await supabase
+        .from('indicadores_capacidade')
+        .select('*')
+        .order('mes_referencia', { ascending: true });
+
+      if (indicadores) {
+        // Formata os dados para o gráfico de Área
+        const formatados = indicadores.map((item) => {
+          const data = new Date(item.mes_referencia);
+          // Adiciona 1 dia para corrigir o fuso horário ao extrair o mês
+          data.setDate(data.getDate() + 1); 
+          const mesFormatado = data.toLocaleDateString('pt-BR', { month: 'short' });
+          
+          return {
+            mes: mesFormatado.charAt(0).toUpperCase() + mesFormatado.slice(1).replace('.', ''),
+            atual: item.taxa_ocupacao_atual,
+            projetado: item.demanda_projetada,
+            alerta: item.limite_critico
+          };
+        });
+        setDataProjecao(formatados);
+      }
+
+      // 2. Busca os dados da matriz de benchmark internacional
+      const { data: matriz } = await supabase
+        .from('matriz_benchmark_global')
+        .select('*');
+
+      if (matriz) {
+        // Formata os dados para o gráfico de Radar
+        const matrizFormatada = matriz.map((item) => ({
+          metrica: item.eixo_analise,
+          Maranhao: item.score_maranhao,
+          OCDE: item.score_ocde,
+          SinoBrasileiro: item.score_sino_brasileiro
+        }));
+        setDataEficiencia(matrizFormatada);
+      }
+
+      setIsLoading(false);
+    }
+
+    carregarDados();
+  }, []);
+
   const KpiCard = ({ title, value, icon: Icon, trend, gradient, delay }: any) => (
     <motion.div
       initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, duration: 0.5 }}
@@ -49,7 +90,9 @@ export default function HubGovernanca() {
       <div className="relative z-10 flex justify-between items-start">
         <div>
           <p className={`text-sm font-medium mb-1 ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>{title}</p>
-          <h3 className={`text-3xl font-bold tracking-tight ${isLightMode ? 'text-slate-900' : 'text-white'}`}>{value}</h3>
+          <h3 className={`text-3xl font-bold tracking-tight ${isLightMode ? 'text-slate-900' : 'text-white'}`}>
+            {isLoading ? "..." : value}
+          </h3>
           <div className="flex items-center gap-1 mt-2">
             <TrendingUp size={14} className="text-[#009B3A]" />
             <span className="text-xs text-[#009B3A] font-medium">{trend} vs mês anterior</span>
@@ -65,7 +108,7 @@ export default function HubGovernanca() {
   return (
     <div className={`flex h-screen w-full overflow-hidden font-sans ${isLightMode ? "bg-slate-50 text-slate-800" : "bg-[#0B1120] text-slate-200"}`}>
       
-      {/* BACKGROUND ANIMADO DE VOLTA (Luxo e Movimento) */}
+      {/* BACKGROUND ANIMADO */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <motion.div 
           animate={{ scale: [1, 1.2, 1], opacity: isLightMode ? [0.03, 0.08, 0.03] : [0.1, 0.2, 0.1] }} transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
@@ -132,7 +175,6 @@ export default function HubGovernanca() {
       {/* ÁREA PRINCIPAL */}
       <div className="flex-1 flex flex-col relative z-10 h-screen overflow-hidden">
         
-        {/* TOPBAR */}
         <header className={`h-20 border-b backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-30 ${isLightMode ? 'bg-white/70 border-slate-200' : 'bg-slate-900/40 border-slate-800'}`}>
           <div>
             <h1 className={`text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${isLightMode ? 'from-[#0033A0] to-slate-600' : 'from-white to-slate-400'}`}>
@@ -142,7 +184,6 @@ export default function HubGovernanca() {
           </div>
           <div className="flex items-center gap-6">
             
-            {/* BOTÃO TEMA INSTANTÂNEO */}
             <motion.button 
               whileTap={{ scale: 0.9 }}
               onClick={() => setIsLightMode(!isLightMode)} 
@@ -170,7 +211,6 @@ export default function HubGovernanca() {
           </div>
         </header>
 
-        {/* CONTEÚDO */}
         <main className="flex-1 overflow-y-auto p-8 scroll-smooth">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }}>
             <div className="flex items-center justify-between mb-8">
@@ -191,7 +231,7 @@ export default function HubGovernanca() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Gráfico 1 */}
+              {/* Gráfico 1: Puxando dados do Supabase */}
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }}
                 className={`lg:col-span-2 p-6 rounded-2xl backdrop-blur-xl border relative overflow-hidden ${isLightMode ? 'bg-white/90 border-slate-200 shadow-sm' : 'bg-slate-900/50 border-slate-700/50 shadow-xl'}`}
@@ -201,31 +241,37 @@ export default function HubGovernanca() {
                   Projeção Estatística: Demanda vs. Capacidade
                 </h3>
                 <div className="h-[350px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={dataProjecao} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="colorAtual" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#0033A0" stopOpacity={0.6}/>
-                          <stop offset="95%" stopColor="#0033A0" stopOpacity={0}/>
-                        </linearGradient>
-                        <linearGradient id="colorProjetado" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#FFD100" stopOpacity={0.4}/>
-                          <stop offset="95%" stopColor="#FFD100" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke={isLightMode ? "#e2e8f0" : "#1e293b"} vertical={false} />
-                      <XAxis dataKey="mes" stroke={isLightMode ? "#64748b" : "#94a3b8"} axisLine={false} />
-                      <YAxis stroke={isLightMode ? "#64748b" : "#94a3b8"} axisLine={false} tickLine={false} />
-                      <Tooltip contentStyle={{ backgroundColor: isLightMode ? '#fff' : '#0f172a', borderColor: isLightMode ? '#e2e8f0' : '#334155', borderRadius: '12px', color: isLightMode ? '#0f172a' : '#fff' }} />
-                      <Area type="monotone" dataKey="alerta" stroke="#EF3340" strokeWidth={2} strokeDasharray="5 5" fill="none" name="Limite Crítico" />
-                      <Area type="monotone" dataKey="projetado" stroke="#FFD100" strokeWidth={3} fillOpacity={1} fill="url(#colorProjetado)" name="Modelo Preditivo" />
-                      <Area type="monotone" dataKey="atual" stroke="#0033A0" strokeWidth={3} fillOpacity={1} fill="url(#colorAtual)" name="Dado Consolidado" />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                  {isLoading ? (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0033A0]"></div>
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={dataProjecao} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="colorAtual" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#0033A0" stopOpacity={0.6}/>
+                            <stop offset="95%" stopColor="#0033A0" stopOpacity={0}/>
+                          </linearGradient>
+                          <linearGradient id="colorProjetado" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#FFD100" stopOpacity={0.4}/>
+                            <stop offset="95%" stopColor="#FFD100" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isLightMode ? "#e2e8f0" : "#1e293b"} vertical={false} />
+                        <XAxis dataKey="mes" stroke={isLightMode ? "#64748b" : "#94a3b8"} axisLine={false} />
+                        <YAxis stroke={isLightMode ? "#64748b" : "#94a3b8"} axisLine={false} tickLine={false} />
+                        <Tooltip contentStyle={{ backgroundColor: isLightMode ? '#fff' : '#0f172a', borderColor: isLightMode ? '#e2e8f0' : '#334155', borderRadius: '12px', color: isLightMode ? '#0f172a' : '#fff' }} />
+                        <Area type="monotone" dataKey="alerta" stroke="#EF3340" strokeWidth={2} strokeDasharray="5 5" fill="none" name="Limite Crítico" />
+                        <Area type="monotone" dataKey="projetado" stroke="#FFD100" strokeWidth={3} fillOpacity={1} fill="url(#colorProjetado)" name="Modelo Preditivo" />
+                        <Area type="monotone" dataKey="atual" stroke="#0033A0" strokeWidth={3} fillOpacity={1} fill="url(#colorAtual)" name="Dado Consolidado" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  )}
                 </div>
               </motion.div>
 
-              {/* Gráfico 2 */}
+              {/* Gráfico 2: Puxando dados do Supabase */}
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6 }}
                 className={`p-6 rounded-2xl backdrop-blur-xl border flex flex-col relative overflow-hidden ${isLightMode ? 'bg-white/90 border-slate-200 shadow-sm' : 'bg-slate-900/50 border-slate-700/50 shadow-xl'}`}
@@ -236,18 +282,24 @@ export default function HubGovernanca() {
                 </h3>
                 <p className={`text-xs mb-4 ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>Análise comparada de administração pública</p>
                 <div className="flex-1 w-full min-h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart cx="50%" cy="50%" outerRadius="70%" data={dataEficiencia}>
-                      <PolarGrid stroke={isLightMode ? "#e2e8f0" : "#334155"} />
-                      <PolarAngleAxis dataKey="metrica" tick={{ fill: isLightMode ? "#64748b" : "#94a3b8", fontSize: 11 }} />
-                      <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                      <Radar name="Maranhão" dataKey="Maranhao" stroke="#FFD100" strokeWidth={2} fill="#FFD100" fillOpacity={0.3} />
-                      <Radar name="Mod. Sino-Brasileiro" dataKey="SinoBrasileiro" stroke="#009B3A" strokeWidth={2} fill="#009B3A" fillOpacity={0.1} />
-                      <Radar name="Padrão OCDE" dataKey="OCDE" stroke="#0033A0" strokeWidth={2} fill="#0033A0" fillOpacity={0.1} />
-                      <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '20px', color: isLightMode ? '#64748b' : '#94a3b8' }} />
-                      <Tooltip contentStyle={{ backgroundColor: isLightMode ? '#fff' : '#0f172a', borderColor: isLightMode ? '#e2e8f0' : '#334155', borderRadius: '8px', color: isLightMode ? '#0f172a' : '#fff' }} />
-                    </RadarChart>
-                  </ResponsiveContainer>
+                  {isLoading ? (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#EF3340]"></div>
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RadarChart cx="50%" cy="50%" outerRadius="70%" data={dataEficiencia}>
+                        <PolarGrid stroke={isLightMode ? "#e2e8f0" : "#334155"} />
+                        <PolarAngleAxis dataKey="metrica" tick={{ fill: isLightMode ? "#64748b" : "#94a3b8", fontSize: 11 }} />
+                        <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                        <Radar name="Maranhão" dataKey="Maranhao" stroke="#FFD100" strokeWidth={2} fill="#FFD100" fillOpacity={0.3} />
+                        <Radar name="Mod. Sino-Brasileiro" dataKey="SinoBrasileiro" stroke="#009B3A" strokeWidth={2} fill="#009B3A" fillOpacity={0.1} />
+                        <Radar name="Padrão OCDE" dataKey="OCDE" stroke="#0033A0" strokeWidth={2} fill="#0033A0" fillOpacity={0.1} />
+                        <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '20px', color: isLightMode ? '#64748b' : '#94a3b8' }} />
+                        <Tooltip contentStyle={{ backgroundColor: isLightMode ? '#fff' : '#0f172a', borderColor: isLightMode ? '#e2e8f0' : '#334155', borderRadius: '8px', color: isLightMode ? '#0f172a' : '#fff' }} />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  )}
                 </div>
               </motion.div>
             </div>
