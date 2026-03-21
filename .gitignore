@@ -1,0 +1,3 @@
+echo "node_modules/" >> .gitignore
+echo ".next/" >> .gitignorenode_modules/
+painel/node_modules/
