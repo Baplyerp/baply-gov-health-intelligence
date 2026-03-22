@@ -1,13 +1,18 @@
+"use client";
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
 export function useHealthData() {
-  const [data, setData] = useState<any>({ projecao: [], eficiencia: [], evidencias: [] });
+  // Inicialização explícita com arrays vazios para evitar 'undefined' no build
+  const [data, setData] = useState({ 
+    projecao: [] as any[], 
+    eficiencia: [] as any[], 
+    evidencias: [] as any[] 
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      setLoading(true);
       try {
         const [ind, mat, ev] = await Promise.all([
           supabase.from('indicadores_capacidade').select('*').order('mes_referencia'),
@@ -18,7 +23,7 @@ export function useHealthData() {
         setData({
           projecao: ind.data?.map(i => ({ 
             mes: new Date(i.mes_referencia).toLocaleDateString('pt-BR', { month: 'short' }).toUpperCase(), 
-            atual: i.taxa_ocupacao_atual, 
+            atual: i.taxa_ocupacao_actual || i.taxa_ocupacao_atual, // Suporte a ambas as grafias
             projetado: i.demanda_projetada, 
             alerta: i.limite_critico 
           })) || [],
@@ -31,7 +36,7 @@ export function useHealthData() {
           evidencias: ev.data || []
         });
       } catch (error) {
-        console.error("Erro na Sala de Situação:", error);
+        console.error("Erro ao buscar dados:", error);
       } finally {
         setLoading(false);
       }
