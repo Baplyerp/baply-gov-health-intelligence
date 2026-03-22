@@ -3,7 +3,6 @@ import { createClient } from '@supabase/supabase-js'
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
   
-  // 1. Verificação de Segurança (Impede o erro 500 por falta de ENV)
   if (!config.public.supabaseUrl || !config.public.supabaseAnonKey) {
     console.error("❌ ERRO: Variáveis do Supabase não encontradas no RuntimeConfig.")
     return { error: "Configuração do banco de dados pendente." }
@@ -14,7 +13,6 @@ export default defineEventHandler(async (event) => {
     config.public.supabaseAnonKey
   )
 
-  // 2. Query com tratamento de erro
   try {
     const { data: ocupacaoReal, error } = await supabase
       .from('dim_unidades')
@@ -29,11 +27,9 @@ export default defineEventHandler(async (event) => {
 
     if (error) {
       console.error("❌ Erro na Query do Supabase:", error.message)
-      // Se a tabela não existir, retornamos um estado vazio amigável
       return { kpis: [], pressaoRegional: { regioes: [], taxas: [] }, status: "Tabelas não encontradas" }
     }
 
-    // 3. Processamento (Só roda se houver dados)
     if (!ocupacaoReal || ocupacaoReal.length === 0) {
       return { kpis: [], pressaoRegional: { regioes: [], taxas: [] }, status: "Sem dados cadastrados" }
     }
@@ -52,7 +48,7 @@ export default defineEventHandler(async (event) => {
       ],
       pressaoRegional: { regioes, taxas }
     }
-git push
+
   } catch (err) {
     return { error: "Falha na conexão com o motor de dados." }
   }
