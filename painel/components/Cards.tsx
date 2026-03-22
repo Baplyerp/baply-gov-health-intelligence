@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { TrendingUp, FileText, ExternalLink } from "lucide-react";
+import { TrendingUp, FileText, ExternalLink, Database } from "lucide-react";
 
 // KPI CARD: Os indicadores com Emojis e Vidro Premium
 export const KpiCard = ({ title, value, icon: Icon, trend, delay, isLight, isLoading }: any) => {
