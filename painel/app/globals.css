@@ -1,60 +1,29 @@
-@import "tailwindcss";
-
-/* 🏛️ CORES OFICIAIS DO ESTADO (BRASÃO/BANDEIRA) */
-:root {
-  --background: #f8fafc; /* Fundo claro premium (slate-50) */
-  --foreground: #0f172a; /* Texto escuro */
-  --gov-blue: #0033A0;   /* Azul Royal - Confiança/Base */
-  --gov-red: #EF3340;    /* Vermelho Carmesim - Alertas/Riscos */
-  --gov-yellow: #FFD100; /* Amarelo Ouro - Ações/Metas */
-  --gov-green: #009B3A;  /* Verde Esmeralda - Eficiência/Sucesso */
+/* 🌟 ANIMAÇÕES DE ALTA PERFORMANCE (CSS PURO) */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0px); }
 }
 
-/* TEMA ESCURO (SALA DE SITUAÇÃO) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #030610; /* Azul quase preto, super profundo */
-    --foreground: #f8fafc; /* Texto claro */
-  }
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 0 0 rgba(255, 209, 0, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 209, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 209, 0, 0); }
 }
 
-/* ⚙️ INJETANDO NO MOTOR DO TAILWIND v4 */
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-gov-blue: var(--gov-blue);
-  --color-gov-red: var(--gov-red);
-  --color-gov-yellow: var(--gov-yellow);
-  --color-gov-green: var(--gov-green);
-  --font-sans: var(--font-geist-sans), Arial, sans-serif;
-  --font-mono: var(--font-geist-mono);
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }
 
-/* 🧹 RESET PREMIUM E SUAVIZAÇÃO DE FONTES */
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden; /* Impede que a tela balance para os lados */
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite;
 }
 
-/* 🚀 MORTE AO SCROLLBAR HORROROSO */
-.custom-scrollbar {
-  -ms-overflow-style: none;  /* Esconde no IE e Edge */
-  scrollbar-width: none;     /* Esconde no Firefox */
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-  display: none; /* Esconde no Chrome, Safari e Opera */
-}
-
-/* 🪟 GLASSMORPHISM GLOBAL (Para os Cards do Bento Grid) */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+/* Trazendo o vidro fosco premium de volta, mas otimizado */
+.glass-premium {
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
 }
