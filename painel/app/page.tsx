@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion"; // 🛡️ Importamos o Variants aqui
 import { Activity, Hospital, Zap, AlertTriangle, Filter, Calendar, MapPin, Download } from "lucide-react";
 import dynamic from "next/dynamic";
 
@@ -9,7 +9,7 @@ import { KpiCard } from "../components/Cards";
 import { useHealthData } from "../hooks/useHealthData";
 import { AppShell } from "../components/AppShell";
 
-// 🚀 O SEGREDO DA VELOCIDADE: Lazy Loading dos Gráficos Pesados
+// 🚀 O SEGREDO DA VELOCIDADE: Lazy Loading
 const AreaVisual = dynamic(() => import("../components/Charts").then(mod => mod.AreaVisual), { 
   ssr: false, 
   loading: () => <div className="w-full h-full flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0033A0]" /></div>
@@ -20,7 +20,11 @@ const RadarVisual = dynamic(() => import("../components/Charts").then(mod => mod
   loading: () => <div className="w-full h-full flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#EF3340]" /></div>
 });
 
-const fadeUp = { hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } } };
+// 🛡️ CORREÇÃO: Constante tipada perfeitamente
+const fadeUp: Variants = { 
+  hidden: { opacity: 0, y: 15 }, 
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } } 
+};
 
 export default function DashboardMetrics({ isLightMode }: any) {
   const { projecao, eficiencia, loading } = useHealthData();
@@ -57,7 +61,7 @@ export default function DashboardMetrics({ isLightMode }: any) {
           </div>
         </motion.div>
 
-        {/* KPIs MACRO - Mais compactos e diretos */}
+        {/* KPIs MACRO */}
         <motion.div variants={fadeUp} initial="hidden" animate="show" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <KpiCard title="Cobertura SES" value="84.2%" icon={Activity} trend="+1.2%" delay={0.1} isLight={isLightMode} isLoading={loading} />
           <KpiCard title="Leitos MA" value="2.450" icon={Hospital} trend="+12" delay={0.2} isLight={isLightMode} isLoading={loading} />
@@ -68,27 +72,23 @@ export default function DashboardMetrics({ isLightMode }: any) {
         {/* BENTO GRID DE INSIGHTS E GRÁFICOS */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          {/* Painel Principal */}
           <motion.div variants={fadeUp} initial="hidden" animate="show" className={`lg:col-span-2 p-6 rounded-3xl border relative overflow-hidden flex flex-col ${isLightMode ? 'bg-white border-slate-200 shadow-sm' : 'glass-panel'} h-[450px]`}>
             <div className="absolute top-0 left-0 w-1.5 h-full bg-[#0033A0]" />
             <div className="flex justify-between items-center mb-6 pl-2">
               <h3 className="font-black text-sm md:text-base uppercase flex items-center gap-2">Demanda vs. Capacidade 📊</h3>
-              <button className="text-[9px] uppercase font-bold text-slate-400 hover:text-[#0033A0] transition-colors flex items-center gap-1 bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-lg"><Calendar size={12}/> Histórico Completo</button>
+              <button className="text-[9px] uppercase font-bold text-slate-400 hover:text-[#0033A0] transition-colors flex items-center gap-1 bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-lg"><Calendar size={12}/> Histórico</button>
             </div>
-            {/* O Gráfico entra dinamicamente aqui */}
             <div className="flex-1 w-full min-h-0">
               <AreaVisual data={projecao} isLight={isLightMode} />
             </div>
           </motion.div>
           
-          {/* Painel Secundário */}
           <motion.div variants={fadeUp} initial="hidden" animate="show" className={`p-6 rounded-3xl border relative overflow-hidden flex flex-col ${isLightMode ? 'bg-white border-slate-200 shadow-sm' : 'glass-panel'} h-[450px]`}>
             <div className="absolute top-0 left-0 w-1.5 h-full bg-[#EF3340]" />
             <div className="mb-6 pl-2">
               <h3 className="font-black text-sm md:text-base uppercase flex items-center gap-2">Benchmark Global 🌍</h3>
               <p className="text-[9px] opacity-50 uppercase tracking-widest mt-1 font-bold">Maranhão vs Padrão OCDE</p>
             </div>
-            {/* O Gráfico entra dinamicamente aqui */}
             <div className="flex-1 w-full min-h-0">
               <RadarVisual data={eficiencia} isLight={isLightMode} />
             </div>
