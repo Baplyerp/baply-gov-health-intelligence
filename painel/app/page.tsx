@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion"; // 🛡️ Import da tipagem Variants adicionado
 import { Activity, Hospital, Zap, AlertTriangle, Filter, Calendar, MapPin } from "lucide-react";
 
 import { AreaVisual, RadarVisual } from "../components/Charts"; 
@@ -9,7 +9,11 @@ import { KpiCard } from "../components/Cards";
 import { useHealthData } from "../hooks/useHealthData";
 import { AppShell } from "../components/AppShell";
 
-const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 80 } } };
+// 🛡️ CORREÇÃO: Variável tipada estritamente como Variants
+const fadeUp: Variants = { 
+  hidden: { opacity: 0, y: 20 }, 
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 80 } } 
+};
 
 export default function DashboardMetrics() {
   const { projecao, eficiencia, loading } = useHealthData();
@@ -51,7 +55,7 @@ export default function DashboardMetrics() {
           <KpiCard title="Risco Estimado" value="Baixo" icon={AlertTriangle} trend="-2%" delay={0.4} isLoading={loading} />
         </motion.div>
 
-        {/* PAINÉIS DE GRÁFICO (Com mais respiro) */}
+        {/* PAINÉIS DE GRÁFICO */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <motion.div variants={fadeUp} initial="hidden" animate="show" className="lg:col-span-2 p-8 rounded-[32px] border bg-slate-900/40 border-white/10 shadow-2xl h-[500px] relative overflow-hidden">
             <div className="absolute top-0 left-0 w-2 h-full bg-[#0033A0]" />
