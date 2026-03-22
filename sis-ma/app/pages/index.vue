@@ -18,7 +18,8 @@ const getStatusIcon = (status, tendencia) => {
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto space-y-8 font-['Plus_Jakarta_Sans']">
+  <div class="max-w-7xl mx-auto space-y-8 font-['Plus_Jakarta_Sans'] pb-12">
+    
     <div class="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-slate-200 pb-6 gap-4 text-slate-800">
       <div>
         <h2 class="text-3xl font-black uppercase tracking-tighter flex items-center gap-3">
@@ -38,19 +39,30 @@ const getStatusIcon = (status, tendencia) => {
     <div v-if="pending" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
       <div v-for="i in 4" :key="i" class="bg-white rounded-[24px] p-6 border border-slate-100 h-32"></div>
     </div>
+    
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div v-for="kpi in panorama.kpis" :key="kpi.id" class="bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm flex flex-col justify-between">
-        <div>
-          <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{{ kpi.titulo }}</h3>
-          <p class="text-3xl font-black tracking-tighter text-slate-800">{{ kpi.valor }}</p>
-        </div>
-        <div class="flex justify-between items-center mt-4">
-          <p class="text-[10px] font-bold text-slate-400">{{ kpi.descricao }}</p>
-          <div class="px-2 py-1 rounded-lg border text-[10px] font-black" :class="getStatusColor(kpi.status)">
-            {{ kpi.tendencia }}
+      
+      <template v-if="panorama?.kpis?.length">
+        <div v-for="kpi in panorama.kpis" :key="kpi.id" class="bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{{ kpi.titulo }}</h3>
+            <p class="text-3xl font-black tracking-tighter text-slate-800">{{ kpi.valor }}</p>
+          </div>
+          <div class="flex justify-between items-center mt-4">
+            <p class="text-[10px] font-bold text-slate-400">{{ kpi.descricao }}</p>
+            <div class="px-2 py-1 rounded-lg border text-[10px] font-black" :class="getStatusColor(kpi.status)">
+              {{ kpi.tendencia }}
+            </div>
           </div>
         </div>
+      </template>
+
+      <div v-else class="col-span-full p-8 text-center bg-red-50/50 rounded-[24px] border border-red-200">
+        <AlertCircle class="w-8 h-8 text-red-500 mx-auto mb-2" />
+        <p class="text-sm font-black text-slate-700">Aguardando Conexão com Supabase</p>
+        <p class="text-xs text-slate-500 mt-1">As variáveis de ambiente não retornaram dados ou a tabela está vazia.</p>
       </div>
+
     </div>
 
     <div class="grid grid-cols-12 gap-6 pt-4">
@@ -61,12 +73,14 @@ const getStatusIcon = (status, tendencia) => {
         </div>
         <div class="flex-1">
           <ChartOcupacao 
-            v-if="panorama?.pressaoRegional"
+            v-if="panorama?.pressaoRegional?.regioes?.length > 0"
             :categorias="panorama.pressaoRegional.regioes" 
             :valores="panorama.pressaoRegional.taxas" 
           />
         </div>
-      </div> <div class="col-span-12 lg:col-span-4 bg-[#006394] rounded-[32px] p-8 text-white flex flex-col justify-between shadow-xl">
+      </div> 
+      
+      <div class="col-span-12 lg:col-span-4 bg-[#006394] rounded-[32px] p-8 text-white flex flex-col justify-between shadow-xl">
         <div>
           <span class="px-3 py-1 bg-white/10 rounded-full text-[9px] font-black uppercase tracking-widest mb-6 inline-block italic">IA Intelligence</span>
           <h3 class="text-2xl font-black tracking-tight mb-4">Otimização de Custos</h3>
@@ -79,5 +93,6 @@ const getStatusIcon = (status, tendencia) => {
         </button>
       </div>
     </div>
+    
   </div>
 </template>
