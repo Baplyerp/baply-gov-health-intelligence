@@ -1,51 +1,59 @@
+<script setup>
+// 🧠 O Cérebro do Tema: Define qual governo está usando o sistema
+useHead({
+  htmlAttrs: {
+    // 💡 Teste trocar 'theme-ma' por 'theme-neutro' depois para ver a mudança instantânea
+    class: 'theme-ma' 
+  }
+})
+</script>
+
 <template>
-  <NuxtLayout>
-    <NuxtPage />
-  </NuxtLayout>
+  <div class="min-h-screen bg-background text-foreground font-sans transition-colors duration-500">
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
+  </div>
 </template>
 
 <style>
 @import "tailwindcss";
 
-:root {
-  /* 🏛️ PALETA GOVERNO DO MARANHÃO (VIBRANTE) */
-  --gov-blue: #0033A0;
-  --gov-red: #EF3340;
-  --gov-yellow: #FFD100;
-  --gov-green: #009B3A;
+/* ☀️ TEMA 1: GOVERNO DO MARANHÃO (MODO POLICLÍNICA - CLARO E CLEAN) */
+.theme-ma {
+  /* Cores extraídas do Manual Oficial RGB */
+  --primary: #D81A21;    /* Vermelho Oficial */
+  --secondary: #006394;  /* Azul Oficial */
+  --accent: #F68F1E;     /* Amarelo Oficial */
+  --green-ma: #009B47;   /* Verde Bandeira */
   
-  /* 🌌 BACKGROUND "PREMIUM DARK" (Não é preto puro) */
-  --bg-deep: #050A18;
-  --bg-card: rgba(255, 255, 255, 0.03);
-  --text-main: #F8FAFC;
+  --background: #F8FAFC; /* Branco Gelo (Fundo principal) */
+  --surface: rgba(255, 255, 255, 0.85); /* Cartões em Vidro Claro */
+  --foreground: #0F172A; /* Texto Escuro para leitura perfeita */
+}
+
+@theme {
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
 }
 
 body {
   margin: 0;
-  background-color: var(--bg-deep);
-  /* 🛰️ EFEITO DE LUZ DE FUNDO */
-  background-image: 
-    radial-gradient(circle at 0% 0%, rgba(0, 51, 160, 0.15) 0%, transparent 35%),
-    radial-gradient(circle at 100% 100%, rgba(239, 51, 64, 0.1) 0%, transparent 35%);
-  color: var(--text-main);
-  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
   overflow-x: hidden;
 }
 
-/* ✨ EFEITO GLASSMORPHISM (VIDRO FOSCO) */
+/* ✨ VIDRO CLARO (Glassmorphism Light) */
 .glass {
-  background: var(--bg-card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  background: var(--surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.05); /* Borda sutil */
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08); /* Sombra elegante */
 }
-
-/* ⚡ NEON BORDER */
-.neon-blue { border-left: 4px solid var(--gov-blue); box-shadow: -10px 0 20px -10px var(--gov-blue); }
-.neon-yellow { border-left: 4px solid var(--gov-yellow); box-shadow: -10px 0 20px -10px var(--gov-yellow); }
-
-/* 🚀 ANIMAÇÃO DE ENTRADA SUAVE */
-.page-enter-active, .page-leave-active { transition: all 0.3s ease; }
-.page-enter-from, .page-leave-to { opacity: 0; transform: translateY(10px); }
 </style>

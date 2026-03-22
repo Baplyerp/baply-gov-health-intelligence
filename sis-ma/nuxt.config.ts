@@ -1,42 +1,37 @@
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineNuxtConfig({
-  // 🚀 Ativa o motor Nuxt 4 e a nova estrutura de diretórios
-  future: {
-    compatibilityVersion: 4,
-  },
-  
-  // ⚡ Configurações de Compatibilidade e Build
+  future: { compatibilityVersion: 4 },
   compatibilityDate: "2024-11-01",
   
-  // 🛡️ Expondo as chaves de forma segura para o Frontend
   runtimeConfig: {
     public: {
-      supabaseUrl: process.env.SUPABASE_URL,
-      supabaseAnonKey: process.env.SUPABASE_KEY,
+      supabaseUrl: process.env.SUPABASE_URL || '',
+      supabaseAnonKey: process.env.SUPABASE_KEY || '',
     }
   },
 
-  vite: { plugins: [tailwindcss()] },
-})
-  
-  // 🛠️ Ativa o Tailwind CSS v4 através do motor Vite
   vite: {
-    plugins: [
-      tailwindcss(),
-    ],
+    plugins: [tailwindcss()]
   },
 
-  // 🧠 Otimizações Experimentais (Alta Performance)
-  experimental: {
-    // Permite que componentes assíncronos não travem a renderização
-    asyncContext: true, 
-    // Garante que o Vue e o Router sejam empacotados de forma otimizada
-    externalVue: false, 
-  },
-
-  // 🔌 Preparação para o Supabase e Módulos de IA (Deixamos pronto)
+  // 🚀 ATIVANDO OS MÓDULOS DE ALTA PERFORMANCE
   modules: [
-    // Futuros módulos entrarão aqui (ex: @nuxtjs/supabase)
+    '@nuxt/image',
+    '@nuxtjs/google-fonts'
   ],
+
+  // 🎨 CONFIGURAÇÃO DA TIPOGRAFIA (Estilo Amsi Pro)
+  googleFonts: {
+    families: {
+      'Plus Jakarta Sans': [300, 400, 600, 800, 900], // Fontes modernas e geométricas
+    },
+    display: 'swap',
+  },
+
+  // 🖼️ MOTOR DE IMAGENS
+  image: {
+    format: ['webp'], // Força carregamento ultrarrápido
+    quality: 100,     // Mantém a logo nítida
+  }
 })
