@@ -2,9 +2,16 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
+// 🛡️ AQUI ESTÁ A MÁGICA: Ensinamos ao TypeScript o que é esse dado
+interface HealthData {
+  projecao: any[];
+  eficiencia: any[];
+  evidencias: any[];
+}
+
 export function useHealthData() {
-  // Inicialização blindada com arrays vazios reais
-  const [data, setData] = useState({ 
+  // Inicialização blindada informando o tipo <HealthData>
+  const [data, setData] = useState<HealthData>({ 
     projecao: [], 
     eficiencia: [], 
     evidencias: [] 
@@ -12,7 +19,7 @@ export function useHealthData() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let isMounted = true; // Evita memory leaks se o componente desmontar rápido
+    let isMounted = true; 
 
     async function load() {
       try {
@@ -24,10 +31,9 @@ export function useHealthData() {
 
         if (isMounted) {
           setData({
-            // O Array.isArray garante que o map só rode se for uma lista válida
             projecao: Array.isArray(ind.data) ? ind.data.map(i => ({ 
               mes: new Date(i.mes_referencia).toLocaleDateString('pt-BR', { month: 'short' }).toUpperCase(), 
-              atual: i.taxa_ocupacao_actual || i.taxa_ocupacao_atual || 0, // Suporte a erro de digitação no banco
+              atual: i.taxa_ocupacao_actual || i.taxa_ocupacao_atual || 0, 
               projetado: i.demanda_projetada || 0, 
               alerta: i.limite_critico || 0 
             })) : [],
@@ -53,7 +59,6 @@ export function useHealthData() {
     return () => { isMounted = false; };
   }, []);
 
-  // Retorno com fallback final. Se for undefined, manda []
   return { 
     projecao: data.projecao || [], 
     eficiencia: data.eficiencia || [], 
