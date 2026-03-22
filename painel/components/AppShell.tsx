@@ -1,39 +1,34 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { Sun, Moon, User, ShieldCheck } from "lucide-react";
 import { Sidebar } from "./Sidebar";
+import { useTheme } from "../contexts/ThemeContext"; // ⚡ Puxando o Estado Global
 
 export const AppShell = ({ children }: { children: React.ReactNode }) => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
-  const [isLightMode, setIsLightMode] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  // Evita o erro de hidratação do Next.js e garante carregamento limpo
-  useEffect(() => setMounted(true), []);
+  
+  // ⚡ Agora a mágica acontece instantaneamente e não se perde entre as telas
+  const { isLightMode, toggleTheme } = useTheme(); 
 
   const theme = useMemo(() => ({
     bg: isLightMode ? "bg-slate-50 text-slate-900" : "bg-[#030610] text-slate-100",
     header: isLightMode ? "bg-white/90 border-slate-200" : "bg-[#0A0F1C]/90 border-white/5",
   }), [isLightMode]);
 
-  if (!mounted) return null; // Segura a tela preta por 1ms para não dar "flicker"
-
   return (
-    <div className={`flex h-screen w-full overflow-hidden transition-colors duration-500 ${theme.bg}`}>
+    // 🚀 Reduzi a duração de 700ms para 200ms. O clique agora é "snappy" (imediato)!
+    <div className={`flex h-screen w-full overflow-hidden transition-colors duration-200 ${theme.bg}`}>
       
-      {/* 🌌 GLOWS OTIMIZADOS (Sem excesso de blur para poupar a Placa de Vídeo) */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#0033A0]/10 blur-[120px]" />
         <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] rounded-full bg-[#EF3340]/10 blur-[120px]" />
       </div>
 
-      {/* SIDEBAR JÁ MODULARIZADA */}
       <Sidebar isOpen={isSidebarOpen} setOpen={setSidebarOpen} isLight={isLightMode} />
 
       <div className="flex-1 flex flex-col relative z-10 overflow-hidden">
         
-        {/* HEADER FIXO E EXECUTIVO */}
         <header className={`h-20 px-8 flex items-center justify-between border-b backdrop-blur-md z-30 ${theme.header}`}>
           <div className="flex items-center gap-4">
             <ShieldCheck size={28} className="text-[#009B3A]" />
@@ -44,7 +39,8 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
           </div>
           
           <div className="flex items-center gap-6">
-            <button onClick={() => setIsLightMode(!isLightMode)} className={`p-2.5 rounded-xl border transition-all active:scale-95 ${isLightMode ? 'border-slate-200 hover:bg-slate-100' : 'border-white/10 hover:bg-white/5'}`}>
+            {/* ⚡ Botão que aciona a troca global */}
+            <button onClick={toggleTheme} className={`p-2.5 rounded-xl border transition-all active:scale-90 ${isLightMode ? 'border-slate-200 hover:bg-slate-100 text-amber-500' : 'border-white/10 hover:bg-white/5 text-[#FFD100]'}`}>
               {isLightMode ? <Sun size={18} /> : <Moon size={18} />}
             </button>
             <div className="flex items-center gap-4 pl-6 border-l border-slate-300 dark:border-slate-700">
@@ -63,7 +59,6 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
           </div>
         </header>
 
-        {/* 🚀 ÁREA DE CONTEÚDO COM A CLASSE MÁGICA DO SCROLL */}
         <main className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
           {React.Children.map(children, child => {
             if (React.isValidElement(child)) {
