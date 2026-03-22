@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import { 
   Activity, Bell, User, Sun, Moon, Search, CheckCircle, 
   Database, Hospital, Zap, AlertTriangle, ShieldCheck, MapPin
@@ -12,13 +12,13 @@ import { AreaVisual, RadarVisual } from "../components/Charts";
 import { KpiCard, DocumentCard } from "../components/Cards";
 import { useHealthData } from "../hooks/useHealthData";
 
-// Animações para carregar a página com efeito cascata
-const fadeUpContainer = {
+// 🛡️ CORREÇÃO: Tipamos os objetos de animação com 'Variants' do Framer Motion
+const fadeUpContainer: Variants = {
   hidden: { opacity: 0 },
   show: { opacity: 1, transition: { staggerChildren: 0.1 } }
 };
 
-const fadeUpItem = {
+const fadeUpItem: Variants = {
   hidden: { opacity: 0, y: 20 },
   show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } }
 };
@@ -27,7 +27,6 @@ export default function HubGovernanca() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isLightMode, setIsLightMode] = useState(false);
   
-  // Pegando os dados blindados
   const { projecao, eficiencia, evidencias, loading } = useHealthData();
   
   const [buscaCnpj, setBuscaCnpj] = useState("");
@@ -55,7 +54,6 @@ export default function HubGovernanca() {
     }
   };
 
-  // Garante que é array antes de rodar o .map() - Segurança de Build Vercel
   const safeEvidencias = Array.isArray(evidencias) ? evidencias : [];
 
   return (
