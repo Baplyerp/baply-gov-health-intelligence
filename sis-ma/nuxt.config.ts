@@ -15,23 +15,20 @@ export default defineNuxtConfig({
     plugins: [tailwindcss()]
   },
 
-  // 🚀 ATIVANDO OS MÓDULOS DE ALTA PERFORMANCE
   modules: [
     '@nuxt/image',
     '@nuxtjs/google-fonts'
   ],
 
-  // 🎨 CONFIGURAÇÃO DA TIPOGRAFIA (Estilo Amsi Pro)
   googleFonts: {
     families: {
-      'Plus Jakarta Sans': [300, 400, 600, 800, 900], // Fontes modernas e geométricas
+      'Plus Jakarta Sans': [300, 400, 600, 800, 900],
     },
     display: 'swap',
   },
 
-  // 🖼️ MOTOR DE IMAGENS
   image: {
-    format: ['webp'], // Força carregamento ultrarrápido
-    quality: 100,     // Mantém a logo nítida
+    format: ['webp'],
+    quality: 100,
   }
 })

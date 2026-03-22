@@ -4,30 +4,33 @@ import { CanvasRenderer } from 'echarts/renderers'
 import { BarChart } from 'echarts/charts'
 import { TitleComponent, TooltipComponent, GridComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
-import { ref, provide } from 'vue'
+import { computed, provide } from 'vue'
 
 use([CanvasRenderer, BarChart, TitleComponent, TooltipComponent, GridComponent])
-
-// ☀️ AQUI ESTÁ A MÁGICA: Mudamos para o tema Claro
 provide('THEME_KEY', 'light')
 
-const option = ref({
+// 📥 RECEBENDO OS DADOS DA PÁGINA PAI
+const props = defineProps({
+  categorias: { type: Array, required: true },
+  valores: { type: Array, required: true }
+})
+
+// ⚙️ GRÁFICO REATIVO: Se o dado mudar, o gráfico anima sozinho
+const option = computed(() => ({
   backgroundColor: 'transparent',
   tooltip: {
     trigger: 'axis',
     axisPointer: { type: 'shadow' },
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderColor: '#e2e8f0',
-    textStyle: { color: '#1e293b', fontWeight: 'bold' } // Tooltip agora tem texto escuro
+    textStyle: { color: '#1e293b', fontWeight: 'bold' }
   },
-  grid: {
-    left: '3%', right: '4%', bottom: '3%', top: '10%', containLabel: true
-  },
+  grid: { left: '3%', right: '4%', bottom: '3%', top: '10%', containLabel: true },
   xAxis: {
     type: 'category',
-    data: ['Imperatriz', 'Caxias', 'Balsas', 'Pinheiro', 'S. Inês'],
-    axisLine: { lineStyle: { color: '#cbd5e1' } }, // Linha do eixo cinza clara
-    axisLabel: { color: '#64748b', fontWeight: 'bold', fontFamily: 'Plus Jakarta Sans' } // Texto cinza chumbo
+    data: props.categorias, // ⬅️ Dado dinâmico
+    axisLine: { lineStyle: { color: '#cbd5e1' } },
+    axisLabel: { color: '#64748b', fontWeight: 'bold', fontFamily: 'Plus Jakarta Sans' }
   },
   yAxis: {
     type: 'value',
@@ -39,9 +42,8 @@ const option = ref({
       name: 'Ocupação (%)',
       type: 'bar',
       barWidth: '40%',
-      data: [92, 78, 65, 88, 54],
+      data: props.valores, // ⬅️ Dado dinâmico
       itemStyle: {
-        // 🔵 Degradê vibrante do Governo (Azul Oficial)
         color: {
           type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
           colorStops: [
@@ -53,7 +55,7 @@ const option = ref({
       }
     }
   ]
-})
+}))
 </script>
 
 <template>
@@ -62,7 +64,7 @@ const option = ref({
       <VChart :option="option" autoresize />
       <template #fallback>
         <div class="w-full h-full flex items-center justify-center text-[#006394] font-black text-xs uppercase animate-pulse">
-          Motor Gráfico Inicializando...
+          Renderizando Matriz de Dados...
         </div>
       </template>
     </ClientOnly>
